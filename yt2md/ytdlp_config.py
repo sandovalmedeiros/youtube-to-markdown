@@ -12,6 +12,10 @@ YT_COOKIES_FILE = os.environ.get("YT2MD_COOKIES_FILE", "/root/yt-cookies.txt")
 # Servidor bgutil-ytdlp-pot-provider (HTTP) rodando local na porta 4416.
 YT_POT_BASEURL = os.environ.get("YT2MD_POT_BASEURL", "http://127.0.0.1:4416")
 
+# yt-dlp >= 2026.08 pede runtime JS p/ extrair do YouTube (deno ejs.ctxServer).
+# Node 24 resolve; deno não está instalado na VPS.
+JS_RUNTIME = os.environ.get("YT2MD_JS_RUNTIME", "node:/root/.hermes/node/bin/node")
+
 
 def base_ydl_opts(**extra):
     """Opções-base obrigatórias para qualquer YoutubeDL() do yt2md."""
@@ -24,6 +28,9 @@ def base_ydl_opts(**extra):
         opts["extractor_args"] = {
             "youtube": {"getpot_bgutil_baseurl": [YT_POT_BASEURL]}
         }
+
+    if JS_RUNTIME:
+        opts["js_runtimes"] = JS_RUNTIME
 
     opts.update(extra)
     return opts
