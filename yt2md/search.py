@@ -8,6 +8,8 @@ import sys
 from typing import Dict, List, Optional
 import yt_dlp
 
+from .ytdlp_config import base_ydl_opts
+
 from .extractor import is_interactive, process_single_video, resolve_output_dir
 from .utils import ensure_utf8_io, format_timestamp, sanitize_filename, to_file_uri
 
@@ -30,12 +32,12 @@ def search_youtube(query: str, limit: int = 5) -> List[Dict]:
     Searches YouTube natively using yt-dlp ytsearch syntax without requiring Google API keys.
     """
     ensure_utf8_io()
-    ydl_opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "extract_flat": "in_playlist",
-        "skip_download": True,
-    }
+    ydl_opts = base_ydl_opts(
+        quiet=True,
+        no_warnings=True,
+        extract_flat="in_playlist",
+        skip_download=True,
+    )
 
     search_target = f"ytsearch{limit}:{query}"
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:

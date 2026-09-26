@@ -22,6 +22,7 @@ from .subtitles import extract_native_subtitles
 from .transcriber import compress_audio, transcribe_with_groq
 from .utils import ensure_utf8_io, format_timestamp, sanitize_filename, to_file_uri
 from .visual import extract_visual_timeline
+from .ytdlp_config import base_ydl_opts
 
 
 def is_interactive() -> bool:
@@ -129,12 +130,12 @@ def process_single_video(
         print(f"\n[>] Ingesting media: {url}")
 
     # Step 0: Extract Metadata
-    ydl_opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "skip_download": True,
-        "getcomments": extract_comments,
-    }
+    ydl_opts = base_ydl_opts(
+        quiet=True,
+        no_warnings=True,
+        skip_download=True,
+        getcomments=extract_comments,
+    )
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
@@ -186,13 +187,13 @@ def process_single_video(
         temp_audio = os.path.join(out_dir, "temp_audio.m4a")
         compressed_mp3 = os.path.join(out_dir, "audio.mp3")
 
-        audio_dl_opts = {
-            "format": "bestaudio/best",
-            "outtmpl": temp_audio,
-            "quiet": True,
-            "no_warnings": True,
-            "overwrites": True
-        }
+        audio_dl_opts = base_ydl_opts(
+            format="bestaudio/best",
+            outtmpl=temp_audio,
+            quiet=True,
+            no_warnings=True,
+            overwrites=True
+        )
         with yt_dlp.YoutubeDL(audio_dl_opts) as ydl:
             ydl.download([url])
 
@@ -226,13 +227,13 @@ def process_single_video(
         if not quiet:
             print("[*] Downloading video stream (720p) for 16-frame visual timeline...")
         video_file = os.path.join(out_dir, "video.mp4")
-        video_dl_opts = {
-            "format": "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
-            "outtmpl": video_file,
-            "quiet": True,
-            "no_warnings": True,
-            "overwrites": True
-        }
+        video_dl_opts = base_ydl_opts(
+            format="bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+            outtmpl=video_file,
+            quiet=True,
+            no_warnings=True,
+            overwrites=True
+        )
         try:
             with yt_dlp.YoutubeDL(video_dl_opts) as ydl:
                 ydl.download([url])
@@ -328,11 +329,11 @@ def process_playlist(
     if not quiet:
         print(f"\n[>] Fetching playlist entries: {url}")
 
-    ydl_opts = {
-        "quiet": True,
-        "extract_flat": "in_playlist",
-        "skip_download": True
-    }
+    ydl_opts = base_ydl_opts(
+        quiet=True,
+        extract_flat="in_playlist",
+        skip_download=True
+    )
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         playlist_info = ydl.extract_info(url, download=False)
